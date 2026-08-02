@@ -1,0 +1,35 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@2.1.1
+
+jobs:
+  quality:
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      # 1. Fetch the code
+      - checkout
+
+      # 2. Install Poetry and project dependencies, cached between runs
+      - python/install-packages:
+          pkg-manager: poetry
+
+      # 3. Check style and formatting
+      - run:
+          name: Lint
+          command: poetry run ruff check src tests scripts
+
+      # 4. Run the test suite
+      - run:
+          name: Test
+          command: poetry run pytest --junitxml=results/pytest.xml
+
+      # 5. Publish results to the CircleCI dashboard
+      - store_test_results:
+          path: results
+
+workflows:
+  on-every-push:
+    jobs:
+      - quality
