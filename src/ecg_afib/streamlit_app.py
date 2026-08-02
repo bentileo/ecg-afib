@@ -495,7 +495,7 @@ def render() -> None:
     # The history view only appears when there is somewhere to read it from.
     labels = ["Screen", "Method"]
     if database.admin_available() and settings.ADMIN_PASSWORD:
-        labels.insert(1, "History")
+        labels.append("History")
 
     tabs = st.tabs(labels)
     views = {"Screen": screening_tab, "History": history_tab, "Method": about_tab}
