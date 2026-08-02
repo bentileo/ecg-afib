@@ -2,8 +2,6 @@ name: Deploy
 
 # Deploys on every merge to main, and on demand from the Actions tab.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
