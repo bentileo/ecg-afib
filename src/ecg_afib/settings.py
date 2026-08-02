@@ -54,4 +54,7 @@ THRESHOLD = 0.10
 # --- Supabase -------------------------------------------------------------
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+SUPABASE_SECRET_KEY = os.getenv("SUPABASE_SECRET_KEY", "")
 SUPABASE_TABLE = os.getenv("SUPABASE_TABLE", "predictions")
+
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
