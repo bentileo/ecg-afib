@@ -1,0 +1,17 @@
+# Theme for the ECG screening dashboard.
+# Matches the palette of bentileo.tech so the two feel like one site.
+
+[theme]
+base = "light"
+primaryColor = "#C8342B"
+backgroundColor = "#FDFCFA"
+secondaryBackgroundColor = "#F1EDE6"
+textColor = "#16161A"
+linkColor = "#C8342B"
+font = "serif"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false
