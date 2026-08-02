@@ -129,16 +129,18 @@ sees why a recording was flagged rather than trusting a probability.
 
 [PTB-XL](https://physionet.org/content/ptb-xl/) — 21,799 clinical 12-lead ECGs
 from 18,869 patients (Wagner et al., *Scientific Data*, 2020). Lead II at 100 Hz
-is used. The data is not included in this repository; `scripts/download_data.sh`
-fetches it.
+is used. The data is not included in this repository;
+`scripts/download_data.sh` fetches it.
 
 ## Requirements
 
 - Python 3.12, installed through [pyenv](https://github.com/pyenv/pyenv)
 - [Poetry](https://python-poetry.org/docs/basic-usage/)
 - `wget`, for the dataset download
-- A [Supabase](https://supabase.com) project (optional, for prediction history)
+- A [Supabase](https://supabase.com) project (optional, for screening history)
 - A VPS (optional, for hosting)
+
+The application runs without Supabase. The history view simply does not appear.
 
 ## Installation
 
@@ -177,39 +179,69 @@ print(result["heart_rate"])    # 150.0
 
 ## Configuration
 
-Edit `src/ecg_afib/settings.py`:
+Model and signal behavior lives in `src/ecg_afib/settings.py`:
 
 - `THRESHOLD` — operating point; lower catches more cases, raises false alarms
 - `N_ESTIMATORS`, `CLASS_WEIGHT` — model parameters
-- `MIN_BEATS`, `MAX_RR_MS` — signal-quality limits
+- `MIN_BEATS`, `MAX_RR_MS` — signal-quality limits applied after R-peak detection
+- `MIN_SAMPLES`, `MAX_SAMPLES`, `MAX_PLAUSIBLE_MV` — bounds applied to uploaded
+  files before any processing
 - `SAMPLING_RATE`, `LEAD_INDEX` — signal parameters
+
+Credentials come from the environment, never from source. See `.env.example`:
+
+- `SUPABASE_URL`, `SUPABASE_KEY` — write screening results
+- `SUPABASE_SECRET_KEY` — read them back for the history view
+- `ADMIN_PASSWORD` — gates that view
+
+Upload size is capped in `.streamlit/config.toml`, which also sets the theme.
 
 ## Deployment
 
-1. Create the Supabase table with `scripts/schema.sql`.
-2. Copy `.env.example` to `.env` and fill in the credentials.
-3. Clone onto the VPS at `/opt/ecg-afib` and create a systemd unit running
-   `make dashboard`.
-4. Run `scripts/deploy.sh` on the server to pull, install, and restart.
+1. Create a Supabase project, then run the SQL in `scripts/` **in order**:
+   `schema.sql` creates the table and enables row-level security,
+   `lockdown.sql` removes public read access, and
+   `rate_limit.sql` adds an insert rate limit and value constraints.
+   Running only the first leaves the table readable by anyone holding the
+   publishable key.
+2. Copy `.env.example` to `.env` on the server and fill it in, then
+   `chmod 600 .env`.
+3. Clone onto the VPS at `/opt/ecg-afib`. Create a systemd unit that runs
+   `make dashboard`, with `EnvironmentFile=/opt/ecg-afib/.env` so the
+   credentials load.
+4. Put nginx in front, terminating TLS and proxying to Streamlit on localhost.
+5. Deploy with `bash scripts/deploy.sh`, which pulls, installs, restarts, and
+   verifies the service actually cycled.
 
-The trained model is not committed. Copy it to the server once with `scp`, or
-attach it to a GitHub release.
+The trained model is not committed. Copy it once with `scp`, or attach it to a
+GitHub release.
+
+See [SECURITY.md](SECURITY.md) for what this setup protects and what it does not.
 
 ## Project structure
 
 ```
 .circleci/          lint and test on every push
-.github/workflows/  deploy to the VPS
-scripts/            data download, sample generation, deployment, schema
+.github/workflows/  deployment, run on demand
+.streamlit/         theme and upload limits
+samples/            demo ECGs, so the hosted app needs no dataset
+scripts/
+    download_data.sh   fetch PTB-XL
+    make_samples.py    select demo recordings by measured variability
+    schema.sql         create the table, enable row-level security
+    lockdown.sql       remove public read access
+    rate_limit.sql     cap insert rate, constrain values
+    deploy.sh          pull, install, restart, verify
 src/ecg_afib/
-    settings.py     all configuration
-    extractor.py    metadata, labels, and waveform loading
-    processor.py    R-peak detection, features, quality filtering
-    model.py        build, evaluate, train, save, predict
-    database.py     Supabase persistence
-    main.py         pipeline orchestration
-    streamlit_app.py dashboard
+    settings.py        all configuration
+    extractor.py       metadata, labels, waveform loading, upload validation
+    processor.py       R-peak detection, features, quality filtering
+    model.py           build, evaluate, train, save, predict
+    database.py        Supabase persistence, split read and write credentials
+    main.py            pipeline orchestration
+    streamlit_app.py   dashboard
 tests/              one test module per source module
+SECURITY.md         data handling, credentials, and known gaps
 ```
 
 ## Author
