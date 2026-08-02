@@ -1,5 +1,5 @@
-# Theme for the ECG screening dashboard.
-# Matches the palette of bentileo.tech so the two feel like one site.
+# Theme and server settings for the ECG screening dashboard.
+# The palette matches bentileo.tech so the two feel like one site.
 
 [theme]
 base = "light"
@@ -12,6 +12,11 @@ font = "serif"
 
 [server]
 headless = true
+# A ten-second ECG is roughly 20 KB. Streamlit's 200 MB default would let a
+# single upload exhaust memory, so it is capped at a still-generous 2 MB.
+maxUploadSize = 2
+enableXsrfProtection = true
+enableCORS = false
 
 [browser]
 gatherUsageStats = false
