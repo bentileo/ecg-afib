@@ -1,8 +1,9 @@
 name: Deploy
 
-# Manual for now. Once the VPS secrets are set, add a push trigger here
-# to deploy automatically on merge to main.
+# Deploys on every merge to main, and on demand from the Actions tab.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
