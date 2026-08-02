@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "ecg-afib"
+version = "1.0.0"
+description = "Screens single-lead ECGs for atrial fibrillation from rhythm irregularity"
+authors = ["Leonardo Bentivoglio <leobentivoglio@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "ecg_afib", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+neurokit2 = "^0.2.13"
+wfdb = "^4.1.2"
+scikit-learn = "^1.5.0"
+pandas = "^2.2.0"
+numpy = "^2.0.0"
+pyarrow = "^16.0.0"
+joblib = "^1.4.0"
+matplotlib = "^3.9.0"
+streamlit = "^1.60.0"
+supabase = "^2.31.0"
+python-dotenv = "^1.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+ruff = "^0.6.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B"]
+# X is the conventional name for a feature matrix in scikit-learn code.
+ignore = ["N806"]
