@@ -29,14 +29,27 @@ def inject_styles() -> None:
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap');
 
-        /* ECG paper grid behind everything. */
+        /* ECG paper grid, softened by a wash so it reads as texture rather
+           than as a drawn grid. Without the overlay it dominates the page. */
         .stApp {
             background-image:
-                linear-gradient(rgba(242,198,192,.55) .5px, transparent .5px),
-                linear-gradient(90deg, rgba(242,198,192,.55) .5px, transparent .5px);
-            background-size: 22px 22px, 22px 22px;
+                linear-gradient(rgba(242,198,192,.30) .5px, transparent .5px),
+                linear-gradient(90deg, rgba(242,198,192,.30) .5px, transparent .5px);
+            background-size: 26px 26px, 26px 26px;
+        }
+        .stApp::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background: linear-gradient(180deg,
+                rgba(253,252,250,.78) 0%,
+                rgba(253,252,250,.94) 55%,
+                #FDFCFA 100%);
         }
         .stApp > header { background: transparent; }
+        .block-container { position: relative; z-index: 1; }
         .block-container { max-width: 800px; padding-top: 2.2rem; }
 
         h1, h2, h3, p, li, .stMarkdown {
@@ -248,17 +261,40 @@ def screening_tab() -> None:
 
 
 def history_tab() -> None:
-    """Show previously screened recordings."""
+    """Show previously screened recordings, behind an admin password.
+
+    Screening results contain no identifying information, but they are
+    operational data rather than something a visitor needs, so the view is
+    private. Reading uses the secret key, which never leaves the server.
+    """
+    if not st.session_state.get("admin_unlocked"):
+        st.caption("Screening history is private.")
+        entered = st.text_input(
+            "Admin password", type="password", label_visibility="collapsed",
+            placeholder="Admin password",
+        )
+        if entered:
+            if entered == settings.ADMIN_PASSWORD:
+                st.session_state["admin_unlocked"] = True
+                st.rerun()
+            else:
+                st.error("Incorrect.")
+        return
+
     rows = database.fetch_predictions()
     if not rows:
         st.info("No recordings screened yet.")
         return
 
     history = pd.DataFrame(rows)
-    left, right = st.columns(2)
+    left, middle, right = st.columns(3)
     left.metric("Recordings screened", len(history))
     right.metric("Flagged", int(history["flagged"].sum()))
-    st.dataframe(history, use_container_width=True, hide_index=True)
+    if "probability" in history:
+        middle.metric("Median probability", f"{history['probability'].median():.0%}")
+
+    display = history.drop(columns=["id"], errors="ignore")
+    st.dataframe(display, use_container_width=True, hide_index=True)
 
 
 def about_tab() -> None:
@@ -458,7 +494,7 @@ def render() -> None:
 
     # The history view only appears when there is somewhere to read it from.
     labels = ["Screen", "Method"]
-    if database.is_configured():
+    if database.admin_available() and settings.ADMIN_PASSWORD:
         labels.insert(1, "History")
 
     tabs = st.tabs(labels)
