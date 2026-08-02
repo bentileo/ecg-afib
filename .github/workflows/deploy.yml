@@ -1,6 +1,7 @@
 name: Deploy
 
-# Deploys on every merge to main, and on demand from the Actions tab.
+# Run from the Actions tab. The host filters inbound SSH from CI runners, so
+# pushing does not trigger this; deploy from a trusted machine instead.
 on:
   workflow_dispatch:
 
