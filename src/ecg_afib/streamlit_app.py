@@ -23,107 +23,116 @@ st.set_page_config(
 
 
 def inject_styles() -> None:
-    """Refine typography and spacing on top of the theme in .streamlit/config.toml."""
+    """Typography and spacing on top of the theme in .streamlit/config.toml.
+
+    Same design system as bentileo.tech: white page, Inter for UI text, Source
+    Serif 4 for display, hairline rules, red reserved for the active state.
+    """
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap');
 
-        /* ECG paper grid, softened by a wash so it reads as texture rather
-           than as a drawn grid. Without the overlay it dominates the page. */
-        .stApp {
-            background-image:
-                linear-gradient(rgba(242,198,192,.30) .5px, transparent .5px),
-                linear-gradient(90deg, rgba(242,198,192,.30) .5px, transparent .5px);
-            background-size: 26px 26px, 26px 26px;
-        }
-        .stApp::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            background: linear-gradient(180deg,
-                rgba(253,252,250,.78) 0%,
-                rgba(253,252,250,.94) 55%,
-                #FDFCFA 100%);
+        :root {
+            --ink: #15191d; --ink-2: #46515c; --muted: #6b7682; --rule: #e3e7eb; --rule-2: #cdd4db;
+            --signal: #d9372a; --blue: #1d4ed8; --surface: #fafbfc;
         }
         .stApp > header { background: transparent; }
-        .block-container { position: relative; z-index: 1; }
-        .block-container { max-width: 800px; padding-top: 2.2rem; }
+        .block-container { max-width: 1080px; padding-top: 2.4rem; }
 
-        h1, h2, h3, p, li, .stMarkdown {
+        html, body, p, li, label, .stMarkdown, [data-testid="stCaptionContainer"] {
+            font-family: 'Inter', system-ui, sans-serif !important;
+        }
+        h1, h2, h3 {
             font-family: 'Source Serif 4', Georgia, serif !important;
+            font-weight: 500 !important;
+            letter-spacing: -.012em;
+            color: var(--ink);
         }
-        h1 {
-            font-weight: 700 !important;
-            letter-spacing: -.018em;
-            font-size: 2.5rem !important;
-            margin-bottom: .2rem !important;
+        h1 { font-size: 2.6rem !important; line-height: 1.12 !important; margin-bottom: .3rem !important; }
+        h3 { font-size: 1.45rem !important; margin-top: 1.6rem !important; }
+        .stMarkdown p { color: var(--ink-2); font-size: .98rem; line-height: 1.6; max-width: 72ch; }
+        .stMarkdown strong { color: var(--ink); font-weight: 600; }
+        hr { border-color: var(--rule) !important; margin: 1.8rem 0 !important; }
+
+        /* Masthead */
+        .mast {
+            display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+            padding-bottom: .8rem; border-bottom: 1px solid var(--rule); margin-bottom: 2.2rem;
+            font-family: 'Inter', system-ui, sans-serif; font-size: .9rem;
+        }
+        .mast b { font-weight: 600; color: var(--ink); }
+        .mast small { color: var(--muted); margin-left: .6rem; }
+        .mast a { color: var(--ink-2); text-decoration: none; border-bottom: 2px solid transparent; padding-bottom: .55rem; margin-left: 1.4rem; }
+        .mast a:hover { color: var(--ink); border-bottom-color: var(--signal); }
+
+        .lab {
+            font-family: 'Inter', system-ui, sans-serif; font-size: .7rem; font-weight: 600;
+            letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
         }
 
-        /* Metrics: readable, not shouting. */
+        /* Metrics as a KPI strip */
+        [data-testid="stMetric"] { border-left: 1px solid var(--rule); padding-left: 1rem; }
+        [data-testid="stColumn"]:first-child [data-testid="stMetric"] { border-left: 0; padding-left: 0; }
         [data-testid="stMetricValue"] {
             font-family: 'Source Serif 4', Georgia, serif !important;
-            font-weight: 700 !important;
-            font-size: 1.75rem !important;
-            line-height: 1.2 !important;
+            font-weight: 600 !important; font-size: 2rem !important; line-height: 1 !important;
+            letter-spacing: -.015em; color: var(--ink);
         }
-        [data-testid="stMetricLabel"] {
+        [data-testid="stMetricLabel"] p {
             font-family: 'Inter', system-ui, sans-serif !important;
-            text-transform: uppercase;
-            letter-spacing: .09em;
-            font-size: .66rem !important;
-            opacity: .7;
+            text-transform: uppercase; letter-spacing: .08em; font-weight: 600;
+            font-size: .68rem !important; color: var(--muted) !important;
         }
 
-        /* Tabs */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 1.6rem;
-            border-bottom: 1px solid #E4E1DC;
-        }
+        /* Tabs: text with a red underline, like the site nav */
+        .stTabs [data-baseweb="tab-list"] { gap: 1.8rem; border-bottom: 1px solid var(--rule); }
         .stTabs [data-baseweb="tab"] {
             font-family: 'Inter', system-ui, sans-serif !important;
-            padding: 0 0 .6rem 0;
-            font-size: .9rem;
+            padding: .6rem 0 .75rem 0; font-size: .9rem; color: var(--ink-2);
+        }
+        .stTabs [aria-selected="true"] { color: var(--ink) !important; font-weight: 600; }
+        .stTabs [data-baseweb="tab-highlight"] { background-color: var(--signal); height: 2px; }
+        .stTabs [data-baseweb="tab-border"] { background-color: var(--rule); }
+
+        /* Segmented control and radio */
+        [data-baseweb="segmented-control"] button, .stButtonGroup button, .stRadio label {
+            font-family: 'Inter', system-ui, sans-serif !important; font-size: .85rem !important;
         }
 
-        /* Segmented control: legible, with the selection in signal red. */
-        [data-baseweb="segmented-control"] button,
-        .stButtonGroup button {
-            font-family: 'Inter', system-ui, sans-serif !important;
-            font-size: .82rem !important;
-        }
-
-        /* Upload area and the v2 notice, styled to match.
-           No font-family is set anywhere inside the dropzone: Streamlit draws
-           the upload icon with a ligature font, and overriding it renders the
-           ligature name as literal text next to the icon. */
+        /* Upload area. No font-family inside the dropzone: Streamlit draws the
+           icon with a ligature font and an override renders the ligature name. */
         [data-testid="stFileUploaderDropzone"] {
-            background: rgba(200, 52, 43, .03) !important;
-            border: 1px solid rgba(200, 52, 43, .25) !important;
-            border-radius: 3px;
+            background: var(--surface) !important;
+            border: 1px dashed var(--rule-2) !important;
+            border-radius: 4px;
         }
 
+        /* Panels */
+        .panel {
+            background: var(--surface); border: 1px solid var(--rule); border-radius: 4px;
+            padding: .9rem 1.1rem; margin-top: .8rem;
+            font-family: 'Inter', system-ui, sans-serif; font-size: .85rem; color: var(--ink-2);
+        }
+        .panel strong { color: var(--ink); font-weight: 600; }
+        .coming-soon { }
         .caption-mono {
-            font-family: 'Inter', system-ui, sans-serif;
-            font-size: .68rem;
-            letter-spacing: .1em;
-            text-transform: uppercase;
-            opacity: .68;
+            font-family: 'Inter', system-ui, sans-serif; font-size: .72rem;
+            letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
         }
 
-        .coming-soon {
-            border: 1px solid rgba(200, 52, 43, .25);
-            border-radius: 3px;
-            padding: .85rem 1.1rem;
-            margin-top: .8rem;
-            background: rgba(200, 52, 43, .03);
-            font-family: 'Inter', system-ui, sans-serif;
-            font-size: .82rem;
-            color: #5C5C64;
+        /* Tables */
+        [data-testid="stDataFrame"] { border: 1px solid var(--rule); border-radius: 4px; }
+
+        /* Alerts: flat, hairline, no pastel blocks */
+        [data-testid="stAlert"] { border-radius: 4px; border: 1px solid var(--rule); }
+
+        footer, .foot {
+            margin-top: 3rem; padding-top: .9rem; border-top: 1px solid var(--rule);
+            font-family: 'Inter', system-ui, sans-serif; font-size: .78rem; color: var(--muted);
         }
-        .coming-soon strong { color: #C8342B; font-weight: 600; }
+        .foot a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid transparent; }
+        .foot a:hover { color: var(--ink); border-bottom-color: var(--signal); }
         </style>
         """,
         unsafe_allow_html=True,
@@ -150,10 +159,10 @@ def plot_signal(signal, r_peaks):
     seconds = np.arange(len(signal)) / settings.SAMPLING_RATE
 
     figure, axes = plt.subplots(figsize=(11, 3.1))
-    figure.patch.set_facecolor("#FDFCFA")
-    axes.set_facecolor("#FDFCFA")
+    figure.patch.set_facecolor("#FFFFFF")
+    axes.set_facecolor("#FFFFFF")
 
-    axes.plot(seconds, signal, linewidth=1.0, color="#16161A")
+    axes.plot(seconds, signal, linewidth=1.1, color="#15191d")
 
     peaks = np.asarray(r_peaks)
     peaks = peaks[peaks < len(signal)]
@@ -161,19 +170,19 @@ def plot_signal(signal, r_peaks):
         axes.scatter(
             peaks / settings.SAMPLING_RATE,
             signal[peaks],
-            color="#C8342B",
+            color="#d9372a",
             s=22,
             zorder=5,
         )
 
-    axes.set_xlabel("Seconds", fontsize=9, color="#5C5C64")
-    axes.set_ylabel("mV", fontsize=9, color="#5C5C64")
-    axes.tick_params(labelsize=8, colors="#5C5C64")
+    axes.set_xlabel("Seconds", fontsize=9, color="#6b7682")
+    axes.set_ylabel("mV", fontsize=9, color="#6b7682")
+    axes.tick_params(labelsize=8, colors="#6b7682")
     for side in ("top", "right"):
         axes.spines[side].set_visible(False)
     for side in ("left", "bottom"):
-        axes.spines[side].set_color("#E4E1DC")
-    axes.grid(True, color="#F2C6C0", linewidth=.4, alpha=.7)
+        axes.spines[side].set_color("#e3e7eb")
+    axes.grid(True, color="#e3e7eb", linewidth=.5)
 
     figure.tight_layout()
     return figure
@@ -238,7 +247,7 @@ def screening_tab() -> None:
             type=["csv"],
         )
         st.markdown(
-            "<div class='coming-soon'><strong>Coming in v2:</strong> upload a "
+            "<div class='panel'><strong>Coming in v2:</strong> upload a "
             "photograph of a printed ECG. The signal is recovered from the "
             "image, then screened the same way.</div>",
             unsafe_allow_html=True,
@@ -481,10 +490,19 @@ def render() -> None:
     """Draw the application."""
     inject_styles()
 
+    st.markdown(
+        "<div class='mast'><span><b>Leonardo Bentivoglio</b>"
+        "<small>Physiologist &amp; Data Scientist</small></span>"
+        "<span><a href='https://bentileo.tech/'>Home</a>"
+        "<a href='https://bentileo.tech/projects/ecg-screening-toolkit/'>Write-up</a>"
+        "<a href='https://github.com/bentileo/ecg-afib'>Code</a></span></div>",
+        unsafe_allow_html=True,
+    )
+    st.markdown("<p class='lab'>Machine learning · Signal processing</p>", unsafe_allow_html=True)
     st.title("ECG Screening Toolkit")
     st.markdown(
-        "<p class='caption-mono'>Ten seconds of rhythm. One question.</p>",
-        unsafe_allow_html=True,
+        "Ten seconds of lead II, one question: is this rhythm irregular enough to "
+        "flag for a clinician?"
     )
     st.caption(DISCLAIMER)
 
@@ -502,6 +520,12 @@ def render() -> None:
     for label, tab in zip(labels, tabs):
         with tab:
             views[label]()
+
+    st.markdown(
+        "<div class='foot'>Educational project, not a medical device. Data: PTB-XL "
+        "(PhysioNet). &nbsp;·&nbsp; <a href='https://bentileo.tech/'>bentileo.tech</a></div>",
+        unsafe_allow_html=True,
+    )
 
 
 render()

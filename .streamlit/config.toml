@@ -1,14 +1,15 @@
 # Theme and server settings for the ECG screening dashboard.
-# The palette matches bentileo.tech so the two feel like one site.
+# The palette is shared with bentileo.tech and the cardiac benchmark dashboard:
+# white page, faint panels, hairline rules, Inter for UI, one red for the active state.
 
 [theme]
 base = "light"
-primaryColor = "#C8342B"
-backgroundColor = "#FDFCFA"
-secondaryBackgroundColor = "#F1EDE6"
-textColor = "#16161A"
-linkColor = "#C8342B"
-font = "serif"
+primaryColor = "#D9372A"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F5F7"
+textColor = "#15191D"
+linkColor = "#1D4ED8"
+font = "sans serif"
 
 [server]
 headless = true
