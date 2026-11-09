@@ -10,6 +10,10 @@
 
 set -euo pipefail
 
+# A non-interactive SSH session does not load the login profile, so poetry
+# (installed under ~/.local/bin) is not on PATH unless added here.
+export PATH="$HOME/.local/bin:$HOME/.poetry/bin:/usr/local/bin:$PATH"
+
 REPO_PATH="/opt/ecg-afib"
 SERVICE_NAME="ecg-afib"
 BRANCH="main"
